@@ -7,6 +7,10 @@ from app.models.attendance import Attendance
 from app.models.employee import Employee
 from app.schemas.attendance import AttendanceCreate,AttendanceResponse
 
+from typing import Optional
+from datetime import date
+
+
 router = APIRouter(
     prefix="/attendance",
     tags = ["Attendance"]
@@ -46,14 +50,23 @@ def mark_attendance(payload: AttendanceCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{employee_id}", response_model=list[AttendanceResponse])
-def get_attendance_for_employee(employee_id: int, db: Session = Depends(get_db)):
+def get_attendance_for_employee(employee_id: int, 
+                                date:Optional[date] = None,
+                                db: Session = Depends(get_db)):
+    
     employee = db.query(Employee).filter(Employee.id == employee_id).first()
     if not employee:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "employee not found"
         )
-    
-    return (
-        db.query(Attendance).filter(Attendance.employee_id == employee_id).order_by(Attendance.date.desc()).all()
+        
+    query = db.query(Attendance).filter(
+        Attendance.employee_id == employee_id
     )
+    
+    if date:
+        query = query.filter(Attendance.date == date)
+    
+    return query.order_by(Attendance.date.desc()).all()
+    
