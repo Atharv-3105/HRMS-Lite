@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.core.database import get_db
 from app.models.employee import Employee
 from app.schemas.employee import EmployeeCreate, EmployeeResponse
-
+from app.models.attendance import Attendance
 
 router = APIRouter(
     prefix = "/employees",
@@ -65,4 +66,17 @@ def delete_employee(employee_id: int, db: Session = Depends(get_db)):
     db.delete(employee)
     db.commit()
 
-    
+#=====Bonus Feature======   
+#/present-day to get the total number of present days by employeeID
+@router.get("/{employee_id}/present-days", response_model=int)
+def get_total_present_days(employee_id:int, db: Session = Depends(get_db)):
+    employee = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not employee:
+        raise HTTPException(
+            status_code= status.HTTP_404_NOT_FOUND,
+            detail = "employee not found"
+        )
+        
+    total_present = (db.query(func.count(Attendance.id)).filter(Attendance.employee_id == employee_id, Attendance.status == "Present").scalar())
+
+    return total_present
