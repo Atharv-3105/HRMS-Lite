@@ -14,7 +14,7 @@ app = FastAPI(
 #CORS MiddleWare setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = ["*"],
+    allow_origins = ["https://hrms-lite-tan-nu.vercel.app"],
     allow_credentials =True,
     allow_methods = ["*"],
     allow_headers = ["*"],
