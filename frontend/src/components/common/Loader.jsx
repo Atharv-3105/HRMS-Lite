@@ -1,5 +1,5 @@
 const Loader = () => {
-    return <p style = {{marginTop: "1rem"}}>Loading...</p>;
+    return <p style = {{padding: "1rem 0"}}>Loading...</p>;
 };
 
 
